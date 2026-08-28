@@ -86,14 +86,16 @@ def formatear_mensaje(paso, datos):
 
 
 def obtener_momento_del_dia():
-    """Retorna el saludo segun la hora del dia en Colombia."""
+    """Retorna la parte variable del saludo para usar con templates.
+    Ejemplo: 'tardes' para usar en 'Buenas {momento_del_dia}'.
+    """
     hora = datetime.now(TZ_COLOMBIA).hour
     if 6 <= hora < 12:
-        return "Buenos días"
+        return "días"
     elif 12 <= hora < 18:
-        return "Buenas tardes"
+        return "tardes"
     else:
-        return "Buenas noches"
+        return "noches"
 
 
 def validar_nombre(respuesta):

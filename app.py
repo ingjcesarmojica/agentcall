@@ -391,7 +391,7 @@ def obtener_estado_chat():
         from guion import obtener_momento_del_dia
         momento = obtener_momento_del_dia()
     except Exception:
-        momento = "Buenos días"
+        momento = "tardes"
     return {
         "caller_name": caller_name,
         "nombre": caller_name,
