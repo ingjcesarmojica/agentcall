@@ -8,6 +8,10 @@ El usuario llama, suenan 3 tonos, Claudia contesta, verifica identidad y asesora
 
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+# Zona horaria de Colombia (UTC-5)
+TZ_COLOMBIA = ZoneInfo("America/Bogota")
 
 PASOS = {
     "saludo_inicial": {
@@ -82,8 +86,8 @@ def formatear_mensaje(paso, datos):
 
 
 def obtener_momento_del_dia():
-    """Retorna el saludo segun la hora del dia."""
-    hora = datetime.now().hour
+    """Retorna el saludo segun la hora del dia en Colombia."""
+    hora = datetime.now(TZ_COLOMBIA).hour
     if 6 <= hora < 12:
         return "Buenos días"
     elif 12 <= hora < 18:
