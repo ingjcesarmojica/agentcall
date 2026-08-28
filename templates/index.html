@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claudia García - Agente Especializada en Derecho</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #03203f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+        }
+        
+        .app-container {
+            width: 380px;
+            height: 700px;
+            background: #03203f;
+            border: 1px solid #185FA5;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 20px 10px;
+            flex-shrink: 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .scales-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+        
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .profile-section {
+            text-align: center;
+            position: relative;
+        }
+        
+        .avatar-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+        
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid #85B7EB;
+            background: #e2e8f0 url('https://bidamericas.com/tusabogados/foto.png') center/cover;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .online-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #25d366;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            white-space: nowrap;
+            z-index: 3;
+            border: 2px solid #03203f;
+            animation: pulseBadge 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseBadge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse-rings {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            z-index: 1;
+            opacity: 1;
+        }
+        
+        .pulse-rings.active {
+            opacity: 1;
+        }
+        
+        .pulse-ring {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            animation: pulse 2s ease-out infinite;
+        }
+        
+        .pulse-ring:nth-child(2) { animation-delay: 0.3s; }
+        .pulse-ring:nth-child(3) { animation-delay: 0.6s; }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.75); opacity: 0.8; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        
+        .phone-waves {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            display: none;
+        }
+        
+        .phone-waves.active {
+            display: block;
+        }
+        
+        .phone-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #25d366;
+            border-radius: 50%;
+            animation: phoneWaveAnim 1.5s ease-out infinite;
+        }
+        
+        .phone-wave:nth-child(2) { animation-delay: 0.5s; }
+        .phone-wave:nth-child(3) { animation-delay: 1s; }
+        
+        @keyframes phoneWaveAnim {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .phone-waves.ringing .phone-wave {
+            border-color: #25d366;
+        }
+        
+        .phone-waves.connected .phone-wave {
+            border-color: #ef4444;
+            animation: none;
+            display: none;
+        }
+
+        .call-timer {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            padding: 5px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 30px;
+            padding: 5px 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .waveform.active { opacity: 1; }
+
+        .waveform .bar {
+            width: 3px;
+            background: #25d366;
+            border-radius: 2px;
+            animation: waveAnim 1s ease-in-out infinite;
+        }
+        .waveform .bar:nth-child(1) { animation-delay: 0s; }
+        .waveform .bar:nth-child(2) { animation-delay: 0.1s; }
+        .waveform .bar:nth-child(3) { animation-delay: 0.2s; }
+        .waveform .bar:nth-child(4) { animation-delay: 0.3s; }
+        .waveform .bar:nth-child(5) { animation-delay: 0.15s; }
+        .waveform .bar:nth-child(6) { animation-delay: 0.25s; }
+        .waveform .bar:nth-child(7) { animation-delay: 0.05s; }
+
+        @keyframes waveAnim {
+            0%, 100% { height: 6px; opacity: 0.5; }
+            50% { height: 24px; opacity: 1; }
+        }
+
+        .waveform.speaking .bar { background: #85B7EB; }
+        .waveform.listening .bar { background: #25d366; }
+
+        .call-transcript {
+            font-size: 11px;
+            color: rgba(255,255,255,0.85);
+            text-align: center;
+            padding: 4px 12px;
+            min-height: 30px;
+            max-height: 50px;
+            overflow-y: auto;
+            line-height: 1.3;
+            font-style: italic;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+        
+        .profile-title {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 20px;
+            flex-shrink: 0;
+        }
+        
+        .mode-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .mode-btn:hover {
+            background: rgba(23, 43, 74, 0.6);
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .call-view, .chat-view {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        .call-view.active, .chat-view.active {
+            display: flex;
+        }
+        
+        .chat-view {
+            display: none !important;
+        }
+        
+        .call-view {
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px;
+            gap: 10px;
+        }
+        
+        .call-messages {
+            flex: 1;
+            overflow-y: auto;
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+        
+        .call-messages .buttons-container {
+            padding: 5px 0;
+        }
+        
+        .call-messages .option-btn {
+            font-size: 12px;
+            padding: 8px 14px;
+            min-width: 110px;
+        }
+        
+        .call-messages::-webkit-scrollbar {
+            width: 3px;
+        }
+        
+        .call-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+        
+        .call-message {
+            max-width: 90%;
+            padding: 8px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            line-height: 1.3;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .call-message.bot {
+            align-self: flex-start;
+            background: rgba(10, 47, 87, 0.85);
+            color: #ffffff;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .call-message.bot.error {
+            background: rgba(232, 118, 10, 0.9);
+            color: #000000;
+            border: 1px solid #f5a623;
+        }
+        
+        .call-message.user {
+            align-self: flex-end;
+            background: rgba(37, 211, 102, 0.85);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .call-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .action-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            font-size: 24px;
+            position: relative;
+            z-index: 3;
+        }
+        
+        .whatsapp-button {
+            background: #25d366;
+            color: #ffffff;
+        }
+        
+        .whatsapp-button:hover {
+            background: #128c7e;
+            transform: scale(1.05);
+        }
+        
+        .end-call-button {
+            background: #ef4444;
+            color: #ffffff;
+            display: none;
+        }
+        
+        .end-call-button:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        
+        .button-label {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 12px;
+            text-align: center;
+        }
+        
+        .call-view.calling .whatsapp-button { display: none; }
+        .call-view.calling .end-call-button { display: flex; }
+        .call-view:not(.calling) .end-call-button { display: none; }
+        
+        .chat-view {
+            padding: 0;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        
+        .message.bot {
+            align-self: flex-start;
+            background: #0a2f57;
+            color: #ffffff;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.bot.error {
+            background: #e8760a;
+            color: #000000;
+            border: 1px solid #f5a623;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: #25d366;
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.typing {
+            background: #0a2f57;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+        
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .chat-input-area {
+            padding: 10px 15px 15px;
+            display: flex;
+            gap: 8px;
+            background: #0a2f57;
+            flex-shrink: 0;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            background: #0c447c;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+        
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .chat-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #25d366;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            background: #128c7e;
+            transform: scale(1.05);
+        }
+        
+        .send-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .status-indicator {
+            text-align: center;
+            padding: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            flex-shrink: 0;
+        }
+        
+        .error-message {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(239, 68, 68, 0.9);
+            color: #ffffff;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            text-align: center;
+            display: none;
+            z-index: 10;
+        }
+        
+        .speak-btn {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .speak-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .speak-btn.playing {
+            background: #25d366;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .option-btn {
+            padding: 10px 18px;
+            border-radius: 20px;
+            border: 2px solid #f5c518;
+            background: #f5c518;
+            color: #000000;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .option-btn:hover {
+            background: #e0b415;
+            color: #000000;
+            transform: scale(1.03);
+            border-color: #e0b415;
+        }
+        
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .option-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .option-btn-small {
+            padding: 8px 14px;
+            font-size: 12px;
+            min-width: 100px;
+        }
+        
+        @media (max-width: 420px) {
+            .app-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+
+        .goodbye-toast {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(37, 211, 102, 0.95);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 340px;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .goodbye-toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="header">
+            <div class="logo-container">
+                <svg class="scales-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2M8 11.5L6.5 16.5L11.5 17.2L13 12.2L8 11.5M16 11.5L13 12.2L14.5 17.2L19.5 16.5L18 11.5L16 11.5Z"/>
+                </svg>
+                <div class="logo-text">tusabogados.com</div>
+            </div>
+            
+            <div class="profile-section">
+                <div class="online-badge">En línea</div>
+                <div class="avatar-container">
+                    <div class="avatar"></div>
+                    <div class="pulse-rings" id="pulseRings">
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring"></div>
+                    </div>
+                </div>
+                
+                <div class="profile-name">Claudia García</div>
+                <div class="profile-title">Agente Especializada en Derecho</div>
+            </div>
+        </div>
+        
+        <div class="mode-toggle">
+            <button class="mode-btn" id="chatModeBtn" onclick="switchMode('chat')" style="display:none">Chat</button>
+            <button class="mode-btn active" id="callModeBtn" onclick="switchMode('call')">Llamada</button>
+        </div>
+        
+        <div class="content-area">
+            <div class="chat-view" id="chatView">
+                <div class="chat-messages" id="chatMessages">
+                </div>
+                <div class="chat-input-area">
+                    <input type="file" id="chatFileInput" multiple accept="image/*,.pdf,.doc,.docx,.mp3,.wav,.ogg" style="display:none" onchange="handleChatFileSelect(event)">
+                    <button class="send-btn" id="chatUploadBtn" onclick="document.getElementById('chatFileInput').click()" style="display:none" title="Adjuntar archivo">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+                        </svg>
+                    </button>
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" id="sendBtn" onclick="sendChatText()">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="chatUploadPreview" style="display:none; padding:8px 12px; background:#1a1a2e; border-top:1px solid #333; font-size:12px; color:#ccc;"></div>
+            </div>
+            
+            <div class="call-view active" id="callView">
+                <div class="call-messages" id="callMessages"></div>
+                <div id="callUploadPreview" style="display:none; padding:8px 12px; background:#1a1a2e; border-top:1px solid #333; font-size:12px; color:#ccc;"></div>
+                
+                <div class="call-timer" id="callTimer" style="display:none">00:00</div>
+                
+                <div class="waveform" id="callWaveform">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+
+                <div class="call-transcript" id="callTranscript"></div>
+                
+                <div class="call-controls">
+                    <input type="file" id="callFileInput" multiple accept="image/*,.pdf,.doc,.docx,.mp3,.wav,.ogg" style="display:none" onchange="handleCallFileSelect(event)">
+                    <button class="action-button whatsapp-button" id="callUploadBtn" onclick="document.getElementById('callFileInput').click()" style="display:none; background:#25d366;" title="Adjuntar archivo">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                            <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+                        </svg>
+                    </button>
+                    <div style="position:relative;display:inline-flex;">
+                        <div class="phone-waves" id="phoneWaves">
+                            <div class="phone-wave"></div>
+                            <div class="phone-wave"></div>
+                            <div class="phone-wave"></div>
+                        </div>
+                        <button class="action-button whatsapp-button" id="startCallBtn" onclick="startCall()">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <button class="action-button end-call-button" id="endCallBtn" onclick="endCall()">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="button-label" id="buttonLabel">Llamar</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-indicator" id="statusIndicator">Este sitio utiliza Agentes de Inteligencia Artificial</div>
+        <div class="goodbye-toast" id="goodbyeToast"></div>
+    </div>
+
+    <script>
+        let currentMode = 'call';
+        let isCalling = false;
+        let isListening = false;
+        let isSpeaking = false;
+        let recognition = null;
+        let currentAudio = null;
+        let chatHistory = [];
+        let ringtoneInterval = null;
+        let ringtoneCtx = null;
+        let callStartTime = 0;
+        let callTimerInterval = null;
+        let callSequenceId = 0;
+        let listeningTimeout = null;
+
+        function updateCallTimer() {
+            var elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+            var m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            var s = String(elapsed % 60).padStart(2, '0');
+            document.getElementById('callTimer').textContent = m + ':' + s;
+        }
+
+        function setWaveformState(state) {
+            var wf = document.getElementById('callWaveform');
+            if (!wf) return;
+            wf.classList.remove('active', 'speaking', 'listening');
+            if (state === 'speaking') { wf.classList.add('active', 'speaking'); }
+            else if (state === 'listening') { wf.classList.add('active', 'listening'); }
+        }
+
+        function setTranscript(text) {
+            var el = document.getElementById('callTranscript');
+            if (el) el.textContent = text;
+        }
+        let listeningTimeout = null;
+        let callSequenceId = 0;
+        
+        const CHAT_API_URL = '/api/chat';
+        const SPEAK_API_URL = '/api/speak';
+        
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            document.getElementById('chatModeBtn').classList.toggle('active', mode === 'chat');
+            document.getElementById('callModeBtn').classList.toggle('active', mode === 'call');
+            
+            document.getElementById('chatView').classList.toggle('active', mode === 'chat');
+            document.getElementById('callView').classList.toggle('active', mode === 'call');
+            
+            if (mode === 'call') {
+                document.getElementById('statusIndicator').textContent = 'Presiona para llamar a Claudia García';
+            } else {
+                endCall();
+                stopRingtone();
+                document.getElementById('statusIndicator').textContent = 'Este sitio utiliza Agentes de Inteligencia Artificial';
+            }
+        }
+        
+        function playRingtone() {
+            stopRingtone();
+            ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let ringCount = 0;
+            
+            function playTone() {
+                if (!ringtoneCtx || !isCalling) return;
+                
+                const osc1 = ringtoneCtx.createOscillator();
+                const osc2 = ringtoneCtx.createOscillator();
+                const gainNode = ringtoneCtx.createGain();
+                
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                osc1.frequency.value = 440;
+                osc2.frequency.value = 480;
+                
+                gainNode.gain.setValueAtTime(0, ringtoneCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.2, ringtoneCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.2, ringtoneCtx.currentTime + 0.3);
+                gainNode.gain.linearRampToValueAtTime(0, ringtoneCtx.currentTime + 0.35);
+                gainNode.gain.setValueAtTime(0, ringtoneCtx.currentTime + 0.4);
+                gainNode.gain.linearRampToValueAtTime(0.2, ringtoneCtx.currentTime + 0.45);
+                gainNode.gain.setValueAtTime(0.2, ringtoneCtx.currentTime + 0.75);
+                gainNode.gain.linearRampToValueAtTime(0, ringtoneCtx.currentTime + 0.8);
+                
+                osc1.connect(gainNode);
+                osc2.connect(gainNode);
+                gainNode.connect(ringtoneCtx.destination);
+                
+                osc1.start(ringtoneCtx.currentTime);
+                osc2.start(ringtoneCtx.currentTime);
+                osc1.stop(ringtoneCtx.currentTime + 0.8);
+                osc2.stop(ringtoneCtx.currentTime + 0.8);
+                
+                ringCount++;
+                if (ringCount >= 3) {
+                    clearInterval(ringtoneInterval);
+                    ringtoneInterval = null;
+                }
+            }
+            
+            playTone();
+            ringtoneInterval = setInterval(playTone, 1000);
+        }
+        
+        function stopRingtone() {
+            if (ringtoneInterval) {
+                clearInterval(ringtoneInterval);
+                ringtoneInterval = null;
+            }
+            if (ringtoneCtx) {
+                ringtoneCtx.close().catch(() => {});
+                ringtoneCtx = null;
+            }
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatText();
+            }
+        }
+        
+        function sendChatText() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            document.getElementById('sendBtn').disabled = true;
+            showTyping();
+            
+            var startTime = Date.now();
+            
+            fetch(CHAT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var elapsed = Date.now() - startTime;
+                var remaining = Math.max(0, 3000 - elapsed);
+                setTimeout(function() {
+                    hideTyping();
+                    document.getElementById('sendBtn').disabled = false;
+                    
+                    if (data.error) {
+                        addMessage('Lo siento, hubo un error. Intenta de nuevo.', 'bot');
+                        return;
+                    }
+                    
+                    addMessage(data.response, 'bot', data.buttons);
+                    toggleUploadBtn('chat', data.show_upload);
+                    
+                    if (data.end_call) {
+                        document.getElementById('chatMessages').innerHTML = '';
+                        document.getElementById('chatInput').value = '';
+                        var toast = document.getElementById('goodbyeToast');
+                        toast.textContent = 'Gracias por utilizar los servicios de TusAbogados.com. Nos pondremos en contacto contigo lo más pronto posible.';
+                        toast.classList.add('show');
+                        setTimeout(function() {
+                            toast.classList.remove('show');
+                        }, 5000);
+                    }
+                }, remaining);
+            })
+            .catch(error => {
+                hideTyping();
+                document.getElementById('sendBtn').disabled = false;
+                addMessage('Error de conexión. Verifica tu internet.', 'bot');
+            });
+        }
+        
+        function sendButtonAction(action, texto) {
+            addMessage(texto, 'user');
+            
+            showTyping();
+            
+            var startTime = Date.now();
+            
+            fetch(CHAT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: texto, action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                var elapsed = Date.now() - startTime;
+                var remaining = Math.max(0, 3000 - elapsed);
+                setTimeout(function() {
+                    hideTyping();
+                    
+                    if (data.error) {
+                        addMessage('Lo siento, hubo un error. Intenta de nuevo.', 'bot');
+                        return;
+                    }
+                    
+                    addMessage(data.response, 'bot', data.buttons);
+                    toggleUploadBtn('chat', data.show_upload);
+                    
+                    if (data.end_call) {
+                        document.getElementById('chatMessages').innerHTML = '';
+                        document.getElementById('chatInput').value = '';
+                        var toast = document.getElementById('goodbyeToast');
+                        toast.textContent = 'Gracias por utilizar los servicios de TusAbogados.com. Nos pondremos en contacto contigo lo más pronto posible.';
+                        toast.classList.add('show');
+                        setTimeout(function() {
+                            toast.classList.remove('show');
+                        }, 5000);
+                    }
+                }, remaining);
+            })
+            .catch(error => {
+                hideTyping();
+                addMessage('Error de conexión. Verifica tu internet.', 'bot');
+            });
+        }
+        
+        function toggleUploadBtn(mode, show) {
+            var btn = mode === 'call' ? document.getElementById('callUploadBtn') : document.getElementById('chatUploadBtn');
+            if (btn) btn.style.display = show ? 'inline-flex' : 'none';
+        }
+        
+        var chatSelectedFiles = [];
+        var callSelectedFiles = [];
+        
+        function handleChatFileSelect(event) {
+            var files = Array.from(event.target.files);
+            chatSelectedFiles = chatSelectedFiles.concat(files);
+            renderUploadPreview('chat');
+        }
+        
+        function handleCallFileSelect(event) {
+            var files = Array.from(event.target.files);
+            callSelectedFiles = callSelectedFiles.concat(files);
+            renderUploadPreview('call');
+            sendCallMessage('He adjuntado mis pruebas. Por favor, continue con la descripción de mi caso.');
+        }
+        
+        function renderUploadPreview(mode) {
+            var files = mode === 'call' ? callSelectedFiles : chatSelectedFiles;
+            var previewId = mode === 'call' ? 'callUploadPreview' : 'chatUploadPreview';
+            var preview = document.getElementById(previewId);
+            
+            if (!files || files.length === 0) {
+                preview.style.display = 'none';
+                return;
+            }
+            
+            preview.style.display = 'block';
+            var html = '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">';
+            files.forEach(function(f, i) {
+                var icon = '📄';
+                if (f.type && f.type.startsWith('image/')) icon = '🖼️';
+                else if (f.type && f.type.startsWith('audio/')) icon = '🎵';
+                html += '<span style="background:#2a2a4a;padding:4px 8px;border-radius:6px;font-size:11px;">' + icon + ' ' + f.name + ' <span style="cursor:pointer;color:#e8760a;" onclick="removeFile(\'' + mode + '\',' + i + ')">✕</span></span>';
+            });
+            html += '</div>';
+            preview.innerHTML = html;
+        }
+        
+        function removeFile(mode, index) {
+            if (mode === 'call') {
+                callSelectedFiles.splice(index, 1);
+            } else {
+                chatSelectedFiles.splice(index, 1);
+            }
+            renderUploadPreview(mode);
+        }
+        
+        function addMessage(text, sender, buttons = null) {
+            const container = document.getElementById('chatMessages');
+            const msg = document.createElement('div');
+            const isError = sender === 'bot' && text.startsWith('Por favor, verifica');
+            msg.className = isError ? 'message bot error' : `message ${sender}`;
+            
+            const textSpan = document.createElement('span');
+            textSpan.textContent = text;
+            msg.appendChild(textSpan);
+            
+            if (sender === 'bot') {
+                const speakBtn = document.createElement('button');
+                speakBtn.className = 'speak-btn';
+                speakBtn.innerHTML = '🔊';
+                speakBtn.onclick = function() { speakMessage(text, this); };
+                msg.style.position = 'relative';
+                msg.appendChild(speakBtn);
+            }
+            
+            container.appendChild(msg);
+            
+            if (buttons && buttons.length > 0 && sender === 'bot') {
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.className = 'buttons-container';
+                
+                buttons.forEach(btn => {
+                    const optionBtn = document.createElement('button');
+                    optionBtn.className = 'option-btn';
+                    optionBtn.textContent = btn.texto;
+                    optionBtn.title = btn.descripcion || '';
+                    optionBtn.onclick = function() {
+                        sendButtonAction(btn.valor, btn.texto);
+                        disableButtons(buttonsDiv);
+                    };
+                    buttonsDiv.appendChild(optionBtn);
+                });
+                
+                container.appendChild(buttonsDiv);
+            }
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function disableButtons(container) {
+            const buttons = container.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.classList.add('disabled');
+            });
+        }
+        
+        function showTyping() {
+            const container = document.getElementById('chatMessages');
+            const typing = document.createElement('div');
+            typing.className = 'message bot typing';
+            typing.id = 'typingIndicator';
+            typing.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+            container.appendChild(typing);
+            container.scrollTop = container.scrollHeight;
+            document.getElementById('pulseRings').classList.add('active');
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+            document.getElementById('pulseRings').classList.remove('active');
+        }
+        
+        function stopCurrentAudio() {
+            if (currentAudio) {
+                try {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                } catch(e) {}
+                currentAudio = null;
+            }
+            isSpeaking = false;
+            document.querySelectorAll('.speak-btn').forEach(b => b.classList.remove('playing'));
+        }
+        
+        function speakMessage(text, btn) {
+            stopCurrentAudio();
+            
+            if (btn && btn.classList.contains('playing')) return;
+            
+            if (btn) btn.classList.add('playing');
+            isSpeaking = true;
+            
+            fetch(SPEAK_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!isSpeaking) return;
+                
+                if (data.audioUrl) {
+                    currentAudio = new Audio(data.audioUrl);
+                    currentAudio.onended = function() {
+                        isSpeaking = false;
+                        currentAudio = null;
+                        if (btn) btn.classList.remove('playing');
+                    };
+                    currentAudio.onerror = function() {
+                        isSpeaking = false;
+                        currentAudio = null;
+                        if (btn) btn.classList.remove('playing');
+                    };
+                    currentAudio.play().catch(() => {
+                        isSpeaking = false;
+                        if (btn) btn.classList.remove('playing');
+                    });
+                } else {
+                    isSpeaking = false;
+                    if (btn) btn.classList.remove('playing');
+                }
+            })
+            .catch(() => {
+                isSpeaking = false;
+                if (btn) btn.classList.remove('playing');
+            });
+        }
+        
+        function startCall() {
+            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                showError("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.");
+                return;
+            }
+            
+            if (isCalling) {
+                endCall();
+                return;
+            }
+            
+            isCalling = true;
+            isListening = false;
+            isSpeaking = false;
+            
+            const callView = document.getElementById('callView');
+            callView.classList.add('calling');
+            document.getElementById('buttonLabel').textContent = 'Finalizar';
+            document.getElementById('statusIndicator').textContent = 'Conectando...';
+            document.getElementById('startCallBtn').style.background = '#25d366';
+            
+            const phoneWaves = document.getElementById('phoneWaves');
+            phoneWaves.classList.add('active', 'ringing');
+            
+            clearCallMessages();
+            playRingtone();
+            
+            // Show timer
+            callStartTime = Date.now();
+            document.getElementById('callTimer').style.display = 'block';
+            callTimerInterval = setInterval(updateCallTimer, 1000);
+            
+            setTimeout(() => {
+                if (!isCalling) return;
+                phoneWaves.classList.remove('ringing');
+                phoneWaves.classList.add('connected');
+                document.getElementById('startCallBtn').style.background = '#ef4444';
+                document.getElementById('statusIndicator').textContent = 'Claudia contesta...';
+                setWaveformState('speaking');
+                sendCallMessage('', 'nueva_llamada');
+            }, 3200);
+        }
+        
+        function endCall() {
+            isCalling = false;
+            killAllCallAudio();
+            stopRingtone();
+            
+            if ('speechSynthesis' in window) speechSynthesis.cancel();
+            
+            const callView = document.getElementById('callView');
+            callView.classList.remove('calling');
+            document.getElementById('buttonLabel').textContent = 'Llamar';
+            document.getElementById('startCallBtn').style.background = '#25d366';
+            document.getElementById('pulseRings').classList.remove('active');
+            
+            const phoneWaves = document.getElementById('phoneWaves');
+            phoneWaves.classList.remove('active', 'ringing', 'connected');
+            
+            if (currentMode === 'call') {
+                document.getElementById('statusIndicator').textContent = 'Llamada finalizada';
+                document.getElementById('callTimer').style.display = 'none';
+                document.getElementById('callTimer').textContent = '00:00';
+                setWaveformState('off');
+                document.getElementById('callTranscript').textContent = '';
+                if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; }
+                // Log call to backend
+                try {
+                    var dur = Math.floor((Date.now() - callStartTime) / 1000);
+                    fetch('/api/log-call', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ duracion_segundos: dur, estado: 'completada' })
+                    });
+                } catch(e) {}
+                setTimeout(() => {
+                    if (!isCalling && currentMode === 'call') {
+                        document.getElementById('statusIndicator').textContent = 'Presiona para llamar a Claudia García';
+                    }
+                }, 3000);
+            }
+        }
+        
+        function addCallMessage(text, sender, buttons = null) {
+            const container = document.getElementById('callMessages');
+            const msg = document.createElement('div');
+            const isError = sender === 'bot' && text.startsWith('Por favor, verifica');
+            msg.className = isError ? 'call-message bot error' : `call-message ${sender}`;
+            msg.textContent = text;
+            container.appendChild(msg);
+            
+            if (buttons && buttons.length > 0 && sender === 'bot') {
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.className = 'buttons-container';
+                buttonsDiv.id = 'callButtonsContainer';
+                
+                buttons.forEach(btn => {
+                    const optionBtn = document.createElement('button');
+                    optionBtn.className = 'option-btn';
+                    optionBtn.textContent = btn.texto;
+                    optionBtn.title = btn.descripcion || '';
+                    optionBtn.onclick = function() {
+                        sendCallButtonAction(btn.valor, btn.texto);
+                        disableButtons(buttonsDiv);
+                    };
+                    buttonsDiv.appendChild(optionBtn);
+                });
+                
+                container.appendChild(buttonsDiv);
+            }
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function clearCallMessages() {
+            const container = document.getElementById('callMessages');
+            container.innerHTML = '';
+        }
+        
+        function sendCallMessage(message, action = null) {
+            if (!isCalling) return;
+            killAllCallAudio();
+            
+            document.getElementById('statusIndicator').textContent = "Respondiendo...";
+            if (message) addCallMessage(message, 'user');
+            
+            var body = { message: message || '' };
+            if (action) body.action = action;
+            
+            fetch(CHAT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (!isCalling) return;
+                if (data.error) {
+                    showError("Error procesando tu mensaje.");
+                    callPromptRetry();
+                    return;
+                }
+                addCallMessage(data.response, 'bot', data.buttons);
+                toggleUploadBtn('call', data.show_upload);
+                var hasButtons = data.buttons && data.buttons.length > 0;
+                callSpeak(data.response, data.end_call, hasButtons);
+            })
+            .catch(function() {
+                if (!isCalling) return;
+                showError("Error de conexión.");
+                callPromptRetry();
+            });
+        }
+        
+        function sendCallButtonAction(action, texto) {
+            if (!isCalling) return;
+            killAllCallAudio();
+            
+            document.getElementById('statusIndicator').textContent = "Respondiendo...";
+            addCallMessage(texto, 'user');
+            
+            fetch(CHAT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: texto, action: action })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (!isCalling) return;
+                if (data.error) {
+                    showError("Error procesando tu mensaje.");
+                    callPromptRetry();
+                    return;
+                }
+                addCallMessage(data.response, 'bot', data.buttons);
+                toggleUploadBtn('call', data.show_upload);
+                var hasButtons = data.buttons && data.buttons.length > 0;
+                callSpeak(data.response, data.end_call, hasButtons);
+            })
+            .catch(function() {
+                if (!isCalling) return;
+                showError("Error de conexión.");
+                callPromptRetry();
+            });
+        }
+        
+        function killAllCallAudio() {
+            callSequenceId++;
+            stopListeningTimeout();
+            isListening = false;
+            isSpeaking = false;
+            
+            if (recognition) {
+                try { recognition.stop(); } catch(e) {}
+                recognition = null;
+            }
+            if (currentAudio) {
+                currentAudio.onended = null;
+                currentAudio.onerror = null;
+                try { currentAudio.pause(); } catch(e) {}
+                currentAudio = null;
+            }
+        }
+        
+        function callSpeak(text, endCallAfter, hasButtons) {
+            if (!isCalling) return;
+            killAllCallAudio();
+            
+            var seqId = callSequenceId;
+            isSpeaking = true;
+            stopRingtone();
+            setWaveformState('speaking');
+            setTranscript(text);
+            document.getElementById('statusIndicator').textContent = "Claudia habla...";
+            
+            fetch(SPEAK_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (!isCalling || seqId !== callSequenceId) return;
+                if (data.audioUrl) {
+                    currentAudio = new Audio(data.audioUrl);
+                    currentAudio.onended = function() {
+                        if (seqId !== callSequenceId) return;
+                        currentAudio = null;
+                        isSpeaking = false;
+                        setWaveformState('off');
+                        if (!isCalling) return;
+                        if (endCallAfter) { endCall(); return; }
+                        if (hasButtons) {
+                            document.getElementById('statusIndicator').textContent = "Seleccione una opción";
+                        } else {
+                            callBeepThenListen();
+                        }
+                    };
+                    currentAudio.onerror = function() {
+                        if (seqId !== callSequenceId) return;
+                        currentAudio = null;
+                        isSpeaking = false;
+                        if (!isCalling) return;
+                        if (endCallAfter) { endCall(); return; }
+                        if (hasButtons) {
+                            document.getElementById('statusIndicator').textContent = "Seleccione una opción";
+                        } else {
+                            callBeepThenListen();
+                        }
+                    };
+                    currentAudio.play().catch(function() {
+                        if (seqId !== callSequenceId) return;
+                        currentAudio = null;
+                        isSpeaking = false;
+                        if (!isCalling) return;
+                        if (endCallAfter) { endCall(); return; }
+                        if (hasButtons) {
+                            document.getElementById('statusIndicator').textContent = "Seleccione una opción";
+                        } else {
+                            callBeepThenListen();
+                        }
+                    });
+                } else {
+                    isSpeaking = false;
+                    if (!isCalling) return;
+                    if (endCallAfter) { endCall(); return; }
+                    if (hasButtons) {
+                        document.getElementById('statusIndicator').textContent = "Seleccione una opción";
+                    } else {
+                        callBeepThenListen();
+                    }
+                }
+            })
+            .catch(function() {
+                if (seqId !== callSequenceId) return;
+                isSpeaking = false;
+                if (!isCalling) return;
+                if (endCallAfter) { endCall(); return; }
+                if (hasButtons) {
+                    document.getElementById('statusIndicator').textContent = "Seleccione una opción";
+                } else {
+                    callBeepThenListen();
+                }
+            });
+        }
+        
+        function callBeepThenListen() {
+            if (!isCalling) return;
+            var seqId = callSequenceId;
+            
+            var beepCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = beepCtx.createOscillator();
+            var gain = beepCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.3, beepCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, beepCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(beepCtx.destination);
+            osc.start(beepCtx.currentTime);
+            osc.stop(beepCtx.currentTime + 0.3);
+            osc.onended = function() {
+                beepCtx.close().catch(function() {});
+                if (!isCalling || seqId !== callSequenceId) return;
+                document.getElementById('statusIndicator').textContent = "Escuchando...";
+                callStartListening();
+            };
+        }
+        
+        function callStartListening() {
+            if (!isCalling || isSpeaking) return;
+            if (recognition) {
+                try { recognition.stop(); } catch(e) {}
+                recognition = null;
+            }
+            isListening = false;
+            
+            var seqId = callSequenceId;
+            
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'es-MX';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = function() {
+                if (!isCalling || seqId !== callSequenceId) return;
+                isListening = true;
+                setWaveformState('listening');
+                document.getElementById('statusIndicator').textContent = "Escuchando...";
+                setTranscript("Escuchando...");
+            };
+            
+            recognition.onresult = function(event) {
+                if (!isCalling || seqId !== callSequenceId) return;
+                var transcript = event.results[0][0].transcript;
+                isListening = false;
+                stopListeningTimeout();
+                setWaveformState('off');
+                setTranscript('Tu: ' + transcript);
+                try { recognition.stop(); } catch(e) {}
+                recognition = null;
+                if (transcript && transcript.trim().length > 0) {
+                    sendCallMessage(transcript);
+                } else {
+                    callPromptRetry();
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                if (seqId !== callSequenceId) return;
+                isListening = false;
+                stopListeningTimeout();
+                if (event.error === 'no-speech') {
+                    callPromptRetry();
+                } else if (event.error === 'not-allowed') {
+                    showError("Permiso de micrófono denegado. Activa el micrófono en tu navegador.");
+                    setTranscript("Permiso de micrófono requerido");
+                    setWaveformState('off');
+                } else if (event.error === 'network') {
+                    showError("Error de red. Verifica tu conexión a internet.");
+                    setTranscript("Error de red");
+                    setWaveformState('off');
+                } else if (event.error !== 'aborted') {
+                    setTranscript("Reintentando...");
+                    setTimeout(function() {
+                        if (!isCalling || seqId !== callSequenceId) return;
+                        callStartListening();
+                    }, 2000);
+                }
+            };
+            
+            recognition.onend = function() {
+                if (seqId !== callSequenceId) return;
+                isListening = false;
+                setWaveformState('off');
+            };
+            
+            try {
+                recognition.start();
+            } catch(e) {
+                recognition = null;
+            }
+            
+            startListeningTimeout();
+        }
+        
+        function callPromptRetry() {
+            if (!isCalling) return;
+            setTranscript("No te escuché bien...");
+            callSpeak("No te escuché bien. Por favor, después de la señal pronuncia claramente el dato solicitado.", false, false);
+        }
+        
+        function startListeningTimeout() {
+            stopListeningTimeout();
+            listeningTimeout = setTimeout(function() {
+                if (!isCalling || isSpeaking) return;
+                callPromptRetry();
+            }, 7000);
+        }
+        
+        function stopListeningTimeout() {
+            if (listeningTimeout) {
+                clearTimeout(listeningTimeout);
+                listeningTimeout = null;
+            }
+        }
+        
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+        
+        window.addEventListener('load', function() {
+            document.getElementById('statusIndicator').textContent = 'Presiona para llamar a Claudia García';
+        });
+    </script>
+</body>
+</html>
