@@ -7,13 +7,12 @@ import json
 import tempfile
 import threading
 import requests
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 import logging
 import edge_tts
 import google.generativeai as genai
 from dotenv import load_dotenv
-from types import SimpleNamespace
 from database import (
     guardar_conversacion,
     guardar_usuario,
@@ -24,8 +23,6 @@ from database import (
     verificar_identidad_usuario,
     guardar_llamada,
 )
-
-chat = SimpleNamespace()
 
 try:
     from rag import search_knowledge, add_pdf, list_documents, delete_document
@@ -38,6 +35,7 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = os.environ.get("SECRET_KEY", "tusabogados-secret-change-in-production-2026")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -365,27 +363,38 @@ Responde SOLO con la palabra: civil, laboral o penal."""
     return None
 
 
+def _default_call_state():
+    """Retorna el estado por defecto de una llamada."""
+    return {
+        "caller_name": "",
+        "caller_documento": "",
+        "caller_email": "",
+        "caller_verified": False,
+        "caller_usuario_data": {},
+        "paso_actual": "saludo_inicial",
+    }
+
+
+def get_call_state():
+    """Obtiene el estado de la llamada desde la sesión."""
+    if "call_state" not in session:
+        session["call_state"] = _default_call_state()
+    return session["call_state"]
+
+
+def save_call_state(state):
+    """Guarda el estado de la llamada en la sesión."""
+    session["call_state"] = state
+
+
 def limpiar_estado_chat():
     """Limpia el estado de la llamada."""
-    attrs = [
-        "caller_name",
-        "caller_documento",
-        "caller_email",
-        "caller_verified",
-        "caller_usuario_data",
-        "paso_actual",
-        "datos_usuario",
-    ]
-    for attr in attrs:
-        if hasattr(chat, attr):
-            delattr(chat, attr)
+    session["call_state"] = _default_call_state()
 
 
 def obtener_estado_chat():
     """Obtiene el estado actual de la llamada como diccionario."""
-    caller_name = getattr(chat, "caller_name", "")
-    caller_documento = getattr(chat, "caller_documento", "")
-    caller_email = getattr(chat, "caller_email", "")
+    state = get_call_state()
     momento = ""
     try:
         from guion import obtener_momento_del_dia
@@ -393,20 +402,15 @@ def obtener_estado_chat():
     except Exception:
         momento = "tardes"
     return {
-        "caller_name": caller_name,
-        "nombre": caller_name,
-        "caller_documento": caller_documento,
-        "documento": caller_documento,
-        "caller_email": caller_email,
-        "correo": caller_email,
+        "caller_name": state["caller_name"],
+        "nombre": state["caller_name"],
+        "caller_documento": state["caller_documento"],
+        "documento": state["caller_documento"],
+        "caller_email": state["caller_email"],
+        "correo": state["caller_email"],
         "momento_del_dia": momento,
-        "paso_actual": getattr(chat, "paso_actual", "saludo_inicial"),
+        "paso_actual": state["paso_actual"],
     }
-
-
-def guardar_estado_campo(campo, valor):
-    """Guarda un campo en el estado de la conversación."""
-    setattr(chat, campo, valor)
 
 
 @app.route("/api/chat", methods=["POST"])
@@ -420,66 +424,80 @@ def chat():
 
         if accion_boton == "nueva_llamada":
             limpiar_estado_chat()
-            chat.paso_actual = "saludo_inicial"
-            chat.datos_usuario = {}
             momento = obtener_momento_del_dia()
-            datos = {"momento_del_dia": momento}
             paso = obtener_paso("saludo_inicial")
-            response = formatear_mensaje(paso, datos)
+            response = formatear_mensaje(paso, {"momento_del_dia": momento})
             save_conversation(response, "saludo_inicial", "")
             return jsonify({"response": response, "end_call": False, "buttons": None, "step": "saludo_inicial"})
+
+        # ── Obtener estado actual desde sesión ─────────────────────────
+        state = get_call_state()
+        paso_actual_id = state["paso_actual"]
+        paso_actual = obtener_paso(paso_actual_id)
 
         message_lower = (message or "").lower().strip()
         is_farewell = any(w in message_lower for w in ["gracias", "adios", "adiós", "chao", "hasta luego", "no gracias", "eso es todo"])
 
-        paso_actual_id = getattr(chat, "paso_actual", "saludo_inicial")
-        paso_actual = obtener_paso(paso_actual_id)
-
         if not paso_actual:
             limpiar_estado_chat()
-            chat.paso_actual = "saludo_inicial"
             momento = obtener_momento_del_dia()
             paso = obtener_paso("saludo_inicial")
             response = formatear_mensaje(paso, {"momento_del_dia": momento})
             return jsonify({"response": response, "end_call": False, "buttons": None, "step": "saludo_inicial"})
 
         if paso_actual_id not in ["saludo_inicial", "despedida"] and is_farewell:
-            name = getattr(chat, "caller_name", "")
+            name = state["caller_name"]
             paso_desp = obtener_paso("despedida")
             response = formatear_mensaje(paso_desp, {"nombre": name})
             limpiar_estado_chat()
             save_conversation(response, "despedida", message)
             return jsonify({"response": response, "end_call": True, "buttons": None, "step": "despedida"})
 
-        # === PASO: saludo_inicial -> pregunta nombre ===
+        # === PASO: saludo_inicial -> captura nombre del usuario ===
         if paso_actual_id == "saludo_inicial":
-            chat.paso_actual = "identificar_llamador"
-            chat.caller_name = ""
+            nombre_usuario = (message or "").strip()
+            if nombre_usuario:
+                state["caller_name"] = nombre_usuario
+            state["paso_actual"] = "identificar_llamador"
+            save_call_state(state)
             paso = obtener_paso("identificar_llamador")
-            momento = obtener_momento_del_dia()
-            response = formatear_mensaje(paso, {"momento_del_dia": momento, "nombre": ""})
+            response = formatear_mensaje(paso, {"nombre": state["caller_name"]})
             save_conversation(response, "identificar_llamador", message)
             return jsonify({"response": response, "end_call": False, "buttons": None, "step": "identificar_llamador"})
 
-        # === PASO: identificar_llamador -> obtiene nombre ===
+        # === PASO: identificar_llamador -> obtiene documento ===
         if paso_actual_id == "identificar_llamador":
+            if state["caller_documento"]:
+                state["paso_actual"] = "verificacion_correo"
+                save_call_state(state)
+                paso = obtener_paso("verificacion_correo")
+                response = formatear_mensaje(paso, obtener_estado_chat())
+                return jsonify({"response": response, "end_call": False, "buttons": None, "step": "verificacion_correo"})
             valido, resultado = validar_respuesta(paso_actual, message)
             if not valido:
                 return jsonify({"response": resultado, "end_call": False, "buttons": None, "step": "identificar_llamador"})
-            chat.caller_name = resultado
-            chat.paso_actual = "verificacion_documento"
-            paso = obtener_paso("verificacion_documento")
+            state["caller_documento"] = resultado
+            state["paso_actual"] = "verificacion_correo"
+            save_call_state(state)
+            paso = obtener_paso("verificacion_correo")
             response = formatear_mensaje(paso, obtener_estado_chat())
-            save_conversation(response, "verificacion_documento", message)
-            return jsonify({"response": response, "end_call": False, "buttons": None, "step": "verificacion_documento"})
+            save_conversation(response, "verificacion_correo", message)
+            return jsonify({"response": response, "end_call": False, "buttons": None, "step": "verificacion_correo"})
 
         # === PASO: verificacion_documento -> obtiene documento ===
         if paso_actual_id == "verificacion_documento":
+            if state["caller_documento"]:
+                state["paso_actual"] = "verificacion_correo"
+                save_call_state(state)
+                paso = obtener_paso("verificacion_correo")
+                response = formatear_mensaje(paso, obtener_estado_chat())
+                return jsonify({"response": response, "end_call": False, "buttons": None, "step": "verificacion_correo"})
             valido, resultado = validar_respuesta(paso_actual, message)
             if not valido:
                 return jsonify({"response": resultado, "end_call": False, "buttons": None, "step": "verificacion_documento"})
-            chat.caller_documento = resultado
-            chat.paso_actual = "verificacion_correo"
+            state["caller_documento"] = resultado
+            state["paso_actual"] = "verificacion_correo"
+            save_call_state(state)
             paso = obtener_paso("verificacion_correo")
             response = formatear_mensaje(paso, obtener_estado_chat())
             save_conversation(response, "verificacion_correo", message)
@@ -487,35 +505,19 @@ def chat():
 
         # === PASO: verificacion_correo -> email y verifica identidad ===
         if paso_actual_id == "verificacion_correo":
+            if state["caller_email"]:
+                return _verificar_y_avanzar(state, message)
             valido, resultado = validar_respuesta(paso_actual, message)
             if not valido:
                 return jsonify({"response": resultado, "end_call": False, "buttons": None, "step": "verificacion_correo"})
-            chat.caller_email = resultado
-            nombre = getattr(chat, "caller_name", "")
-            documento = getattr(chat, "caller_documento", "")
-            email = resultado
-            usuario_encontrado = verificar_identidad_usuario(documento, email)
-            if usuario_encontrado is None:
-                chat.caller_verified = False
-                chat.caller_usuario_data = {"nombre": nombre, "documento": documento, "email": email}
-                response = f"Entendido, {nombre}. No encontre su registro con esos datos, pero con gusto la atendere. Por favor, describame su situacion legal y le orientare."
-            else:
-                chat.caller_verified = True
-                chat.caller_usuario_data = usuario_encontrado
-                cat = usuario_encontrado.get("categoria", "")
-                response = f"Muy bien, {nombre}. He confirmado su identidad. "
-                if cat:
-                    response += f"Encuentro un caso registrado en {cat}. "
-                response += "Describame su situacion legal y con gusto le orientare."
-            chat.paso_actual = "consulta_legal"
-            save_conversation(response, "consulta_legal", message)
-            guardar_usuario({"nombre": nombre, "email": email, "telefono": "", "documento": documento, "rol": "", "categoria": "", "descripcion_caso": "", "paso_actual": "consulta_legal"})
-            return jsonify({"response": response, "end_call": False, "buttons": None, "step": "consulta_legal"})
+            state["caller_email"] = resultado
+            save_call_state(state)
+            return _verificar_y_avanzar(state, message)
 
         # === PASO: consulta_legal -> asesoria LLM ===
         if paso_actual_id == "consulta_legal":
-            nombre = getattr(chat, "caller_name", "usuario")
-            usuario_data = getattr(chat, "caller_usuario_data", {}) or {}
+            nombre = state["caller_name"] or "usuario"
+            usuario_data = state.get("caller_usuario_data", {}) or {}
             cat = usuario_data.get("categoria", "")
             desc = usuario_data.get("descripcion_caso", "")
             context = f"Usuario: {nombre}. "
@@ -551,6 +553,32 @@ def chat():
     except Exception as e:
         app.logger.error(f"Error en chat: {e}", exc_info=True)
         return jsonify({"response": "Disculpe, tuve un problema tecnico. Podria repetir su mensaje.", "end_call": False, "buttons": None, "step": "error"})
+
+
+def _verificar_y_avanzar(state, message):
+    """Verifica identidad del usuario y avanza a consulta legal."""
+    nombre = state["caller_name"]
+    documento = state["caller_documento"]
+    email = state["caller_email"]
+
+    usuario_encontrado = verificar_identidad_usuario(documento, email)
+    if usuario_encontrado is None:
+        state["caller_verified"] = False
+        state["caller_usuario_data"] = {"nombre": nombre, "documento": documento, "email": email}
+        response = f"Entendido, {nombre}. No encontre su registro con esos datos, pero con gusto la atendere. Por favor, describame su situacion legal y le orientare."
+    else:
+        state["caller_verified"] = True
+        state["caller_usuario_data"] = usuario_encontrado
+        cat = usuario_encontrado.get("categoria", "")
+        response = f"Muy bien, {nombre}. He confirmado su identidad. "
+        if cat:
+            response += f"Encuentro un caso registrado en {cat}. "
+        response += "Describame su situacion legal y con gusto le orientare."
+    state["paso_actual"] = "consulta_legal"
+    save_call_state(state)
+    save_conversation(response, "consulta_legal", message)
+    guardar_usuario({"nombre": nombre, "email": email, "telefono": "", "documento": documento, "rol": "", "categoria": "", "descripcion_caso": "", "paso_actual": "consulta_legal"})
+    return jsonify({"response": response, "end_call": False, "buttons": None, "step": "consulta_legal"})
 
 
 @app.route("/api/log-call", methods=["POST"])
@@ -825,8 +853,9 @@ def list_voices():
 
 def save_conversation(response, paso_actual, user_message=""):
     try:
-        email = getattr(chat, "caller_email", "") or getattr(chat, "user_email", "")
-        nombre = getattr(chat, "caller_name", "") or getattr(chat, "user_name", "")
+        state = get_call_state()
+        email = state.get("caller_email", "")
+        nombre = state.get("caller_name", "")
         app.logger.info(
             f"save_conversation: email={email}, nombre={nombre}, paso={paso_actual}, msg_len={len(user_message or '')}"
         )
