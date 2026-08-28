@@ -25,9 +25,9 @@ PASOS = {
         "id": "identificar_llamador",
         "siguiente": "verificacion_documento",
         "mensaje": "Mucho gusto, {nombre}. Para atender su consulta con confianza, necesito realizar unas breves preguntas de seguridad. ¿Me podría confirmar su número de cédula o documento de identidad.",
-        "validar": "nombre",
+        "validar": "documento",
         "botones": None,
-        "campo": "caller_name",
+        "campo": "caller_documento",
     },
     "verificacion_documento": {
         "id": "verificacion_documento",
