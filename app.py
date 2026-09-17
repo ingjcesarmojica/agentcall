@@ -515,10 +515,12 @@ def chat():
                 "En 3 a 4 frases naturales y fluidas: "
                 "1) Menciona que analizaste su caso de derecho " + cat + " y tienes una orientación clara. "
                 "2) Explica brevemente sus derechos y la mejor opción legal. "
-                "3) Concluye convenciéndolo de que TusAbogados.com puede llevar su caso con especialistas, "
-                "solo cobran un 10% si ganan, sin costo inicial. "
+                "3) Hazle la siguiente PREGUNTA al final: "
+                "'¿Desea que un abogado de TusAbogados.com le lleve su caso? "
+                "Recuerde que no tendrá costo inicial y solo cobraremos si ganamos su caso.' "
                 "REGLAS: Solo el primer nombre. Sin markdown ni asteriscos. "
                 "Habla con autoridad y empatía, como por teléfono. Sé convincente pero no exageres. "
+                "La última frase SIEMPRE debe ser esa pregunta. "
                 "Caso: " + desc[:400],
                 "Nombre: " + primer_nombre + ". Categoria: " + cat + ". Caso: " + desc[:400],
             )
