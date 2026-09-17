@@ -510,13 +510,17 @@ def chat():
             momento = obtener_momento_del_dia()
             response = mensaje_asesoria_caso(cat, desc)
             llm_resp = get_llm_response(
-                "Eres Claudia García, asesora legal especialista de TusAbogados.com. "
-                "Saluda al usuario " + primer_nombre + " por su primer nombre con 'Buenas " + momento + ", " + primer_nombre + "'. "
-                "Menciona que ya analizaste su caso de derecho " + cat + ". "
-                "Luego brinda una asesoria legal breve y profesional. "
-                "REGLAS: NO uses markdown. NO garanticiones resultados. Solo el primer nombre. 4 a 5 oraciones. "
-                "Caso del usuario: " + desc[:500],
-                "Nombre: " + primer_nombre + ". Categoria: " + cat + ". Caso: " + desc[:500],
+                "Eres Claudia García, asesora legal de TusAbogados.com. "
+                "Saluda a " + primer_nombre + " con 'Buenas " + momento + ", " + primer_nombre + "'. "
+                "En MAXIMO 6 oraciones haz lo siguiente en orden: "
+                "1) Saluda y menciona que ya analizaste su caso de derecho " + cat + ". "
+                "2) Explica brevemente qué derechos tiene y qué opciones legales existen. "
+                "3) Concluye proponiendo que especialistas de TusAbogados.com pueden llevar su caso, "
+                "solo cobran un 10% si ganan, sin costo inicial. "
+                "REGLAS: Solo el primer nombre. Sin markdown. Sin asteriscos. Sin garantizar resultados. "
+                "Sé conciso pero completo. Responde en español natural. "
+                "Caso: " + desc[:400],
+                "Nombre: " + primer_nombre + ". Categoria: " + cat + ". Caso: " + desc[:400],
             )
             if llm_resp:
                 response = llm_resp
