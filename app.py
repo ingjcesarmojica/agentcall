@@ -660,7 +660,7 @@ def chat():
                 return jsonify({"response": response, "end_call": True, "buttons": None, "step": "despedida"})
         if paso_actual_id == "despedida":
             limpiar_estado_chat()
-            return jsonify({"response": "Ha sido un gusto atenderle. ¡Que tenga un excelente día!", "end_call": True, "buttons": None, "step": "despedida"})
+            return jsonify({"response": "¡Excelente decisión! A partir de ahora, su caso está en las mejores manos. Uno de nuestros abogados especializados se pondrá en contacto con usted muy pronto por WhatsApp y también le escribirá al correo que nos indicó, con los pasos a seguir para avanzar en su proceso. Gracias por confiar en TusAbogados.com, ¡estamos con usted en cada paso del camino!", "end_call": True, "buttons": None, "step": "despedida"})
 
         if not paso_actual:
             limpiar_estado_chat()
