@@ -1711,14 +1711,16 @@
                 var hasButtons = data.buttons && data.buttons.length > 0;
                 var needsCodeRetry = data.step === "solicitar_codigo" || data.step === "saludo_inicial";
                 if (needsCodeRetry) {
-                    // Codigo incorrecto: reiniciar llamada para pedir otro codigo
+                    // Codigo incorrecto: limpiar todo y reiniciar
                     hideTyping();
+                    killAllCallAudio();
+                    clearCallMessages();
                     addCallMessage(data.response, 'bot', null);
                     setTimeout(function() {
                         if (!isCalling) return;
-                        killAllCallAudio();
+                        clearCallMessages();
                         speakGreeting();
-                    }, 2000);
+                    }, 3000);
                     return;
                 }
                 if (hasButtons) {

@@ -493,6 +493,9 @@ def chat():
             if cita is None:
                 response = mensaje_codigo_no_encontrado()
                 state["paso_actual"] = "saludo_inicial"
+                state["cita_data"] = {}
+                state["caller_name"] = ""
+                state["codigo_acceso"] = ""
                 save_call_state(state)
                 save_conversation(response, "solicitar_codigo", message)
                 gc.collect()
