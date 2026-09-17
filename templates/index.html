@@ -1573,7 +1573,7 @@
                         clearInterval(resumeInterval); clearTimeout(fallbackTimer); showCodeInput();
                     };
                     speechSynthesis.cancel();
-                    speechSynthesis.speak(utterance);
+                    speechSynthesis.cancel(); speechSynthesis.speak(utterance); speechSynthesis.resume();
                     speechSynthesis.resume();
                     var resumeInterval = setInterval(function() {
                         if (!isSpeaking) { clearInterval(resumeInterval); return; }
@@ -1770,6 +1770,31 @@
             }
         }
         
+        // ═══ iOS AudioContext: reanudar en gesture del usuario ═══
+        var _sharedAudioCtx = null;
+        function getResumedAudioContext() {
+            if (_sharedAudioCtx && _sharedAudioCtx.state === 'running') return _sharedAudioCtx;
+            try {
+                var Ctor = window.AudioContext || window.webkitAudioContext;
+                if (!Ctor) return null;
+                if (!_sharedAudioCtx) _sharedAudioCtx = new Ctor();
+                if (_sharedAudioCtx.state === 'suspended') _sharedAudioCtx.resume().catch(function(){});
+                return _sharedAudioCtx;
+            } catch(e) { return null; }
+        }
+
+        // Helper: mostrar botones pendientes despues del audio
+        function showPendingButtons(hasBtns) {
+            if (hasBtns || window._pendingButtons) {
+                var btns = window._pendingButtons || null;
+                window._pendingButtons = null; window._pendingResponse = null;
+                if (btns) addCallMessage('', 'bot', btns);
+                document.getElementById('statusIndicator').textContent = "Seleccione una opción";
+                return true;
+            }
+            return false;
+        }
+
         function callSpeak(text, endCallAfter, hasButtons) {
             if (!isCalling) return;
             killAllCallAudio();
@@ -1783,6 +1808,7 @@
             var cleanText = stripMarkdown(text);
             setTranscript(cleanText);
             document.getElementById('statusIndicator').textContent = "Claudia habla...";
+            getResumedAudioContext();
             
             fetch(SPEAK_API_URL, {
                 method: 'POST',
@@ -1815,13 +1841,10 @@
                         if (seqId !== callSequenceId) return;
                         currentAudio = null;
                         isSpeaking = false;
+                        hideTyping();
                         if (!isCalling) return;
                         if (endCallAfter) { endCall(); return; }
-                        if (hasButtons) {
-                            document.getElementById('statusIndicator').textContent = "Seleccione una opción";
-                        } else {
-                            callBeepThenListen();
-                        }
+                        if (!showPendingButtons(hasButtons)) { callBeepThenListen(); }
                     };
                     currentAudio.play().then(function() {
                         hideTyping();
@@ -1842,19 +1865,16 @@
                                 setWaveformState('off');
                                 if (!isCalling) return;
                                 if (endCallAfter) { endCall(); return; }
-                                if (hasButtons) {
-                                    document.getElementById('statusIndicator').textContent = "Seleccione una opción";
-                                } else {
-                                    callBeepThenListen();
-                                }
+                                if (!showPendingButtons(hasButtons)) { callBeepThenListen(); }
                             };
                             utterance.onerror = function() {
                                 if (seqId !== callSequenceId) return;
                                 isSpeaking = false;
+                                hideTyping();
                                 if (!isCalling) return;
-                                callBeepThenListen();
+                                if (!showPendingButtons(hasButtons)) { callBeepThenListen(); }
                             };
-                            speechSynthesis.speak(utterance);
+                            speechSynthesis.cancel(); speechSynthesis.speak(utterance); speechSynthesis.resume();
                         } else {
                             currentAudio = null;
                             isSpeaking = false;
@@ -1864,25 +1884,19 @@
                     });
                 } else {
                     isSpeaking = false;
+                    hideTyping();
                     if (!isCalling) return;
                     if (endCallAfter) { endCall(); return; }
-                    if (hasButtons) {
-                        document.getElementById('statusIndicator').textContent = "Seleccione una opción";
-                    } else {
-                        callBeepThenListen();
-                    }
+                    if (!showPendingButtons(hasButtons)) { callBeepThenListen(); }
                 }
             })
             .catch(function() {
                 if (seqId !== callSequenceId) return;
                 isSpeaking = false;
+                hideTyping();
                 if (!isCalling) return;
                 if (endCallAfter) { endCall(); return; }
-                if (hasButtons) {
-                    document.getElementById('statusIndicator').textContent = "Seleccione una opción";
-                } else {
-                    callBeepThenListen();
-                }
+                if (!showPendingButtons(hasButtons)) { callBeepThenListen(); }
             });
         }
         
