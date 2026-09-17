@@ -57,7 +57,7 @@ else:
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.environ.get(
-    "OPENROUTER_MODEL", "nvidia/nemotron-3-nano-30b-a3b"
+    "OPENROUTER_MODEL", "minimax/minimax-m3:free"
 ).strip()
 OPENROUTER_CONFIGURED = bool(OPENROUTER_API_KEY)
 
@@ -101,7 +101,7 @@ Eres Claudia García, asesora legal especializada en Derecho de TusAbogados.com.
 """
 
 
-MAX_TTS_CHARS = 500
+MAX_TTS_CHARS = 600
 
 
 async def generate_edge_tts(text, voice=None):
@@ -282,7 +282,7 @@ Usuario: {user_message}"""
             "model": OPENROUTER_MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.3,
-            "max_tokens": 1200,
+            "max_tokens": 400,
         }
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -512,13 +512,13 @@ def chat():
             llm_resp = get_llm_response(
                 "Eres Claudia García, asesora legal de TusAbogados.com. "
                 "Saluda a " + primer_nombre + " con 'Buenas " + momento + ", " + primer_nombre + "'. "
-                "En MAXIMO 6 oraciones haz lo siguiente en orden: "
-                "1) Saluda y menciona que ya analizaste su caso de derecho " + cat + ". "
-                "2) Explica brevemente qué derechos tiene y qué opciones legales existen. "
-                "3) Concluye proponiendo que especialistas de TusAbogados.com pueden llevar su caso, "
+                "En 3 a 4 frases naturales y fluidas: "
+                "1) Menciona que analizaste su caso de derecho " + cat + " y tienes una orientación clara. "
+                "2) Explica brevemente sus derechos y la mejor opción legal. "
+                "3) Concluye convenciéndolo de que TusAbogados.com puede llevar su caso con especialistas, "
                 "solo cobran un 10% si ganan, sin costo inicial. "
-                "REGLAS: Solo el primer nombre. Sin markdown. Sin asteriscos. Sin garantizar resultados. "
-                "Sé conciso pero completo. Responde en español natural. "
+                "REGLAS: Solo el primer nombre. Sin markdown ni asteriscos. "
+                "Habla con autoridad y empatía, como por teléfono. Sé convincente pero no exageres. "
                 "Caso: " + desc[:400],
                 "Nombre: " + primer_nombre + ". Categoria: " + cat + ". Caso: " + desc[:400],
             )
