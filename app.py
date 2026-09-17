@@ -1,4 +1,5 @@
-﻿import os
+﻿import gc
+import os
 import io
 import asyncio
 import base64
@@ -100,9 +101,14 @@ Eres Claudia García, asesora legal especializada en Derecho de TusAbogados.com.
 """
 
 
+MAX_TTS_CHARS = 500
+
+
 async def generate_edge_tts(text, voice=None):
     if voice is None:
         voice = TTS_VOICE
+    if len(text) > MAX_TTS_CHARS:
+        text = text[:MAX_TTS_CHARS].rsplit(" ", 1)[0] + "."
     communicate = edge_tts.Communicate(text, voice)
     fd, tmp_path = tempfile.mkstemp(suffix=".mp3")
     os.close(fd)
@@ -110,12 +116,16 @@ async def generate_edge_tts(text, voice=None):
         await communicate.save(tmp_path)
         with open(tmp_path, "rb") as f:
             audio_data = f.read()
-        return base64.b64encode(audio_data).decode("utf-8")
+        encoded = base64.b64encode(audio_data).decode("utf-8")
+        del audio_data
+        gc.collect()
+        return encoded
     finally:
         try:
             os.remove(tmp_path)
         except OSError:
             pass
+        gc.collect()
 
 
 @app.route("/")
@@ -146,6 +156,7 @@ def speak_text():
 
     except Exception as e:
         app.logger.error(f"Error en edge-tts: {str(e)}")
+        gc.collect()
         return jsonify(
             {
                 "audioContent": None,
@@ -310,21 +321,29 @@ def get_llm_response(user_message, context=""):
     app.logger.info(
         f"get_llm_response: OPENROUTER_CONFIGURED={OPENROUTER_CONFIGURED}, GEMINI_CONFIGURED={GEMINI_CONFIGURED}"
     )
+    result = None
     if OPENROUTER_CONFIGURED:
         app.logger.info("Intentando OpenRouter...")
         result = openrouter_response(user_message, context)
         if result:
             app.logger.info(f"OpenRouter respondió: {result[:100]}...")
-            return limpiar_markdown(result)
+            cleaned = limpiar_markdown(result)
+            del result
+            gc.collect()
+            return cleaned
         app.logger.warning("OpenRouter falló, intentando Gemini como fallback")
     if GEMINI_CONFIGURED:
         app.logger.info("Intentando Gemini...")
         result = gemini_response(user_message, context)
         if result:
             app.logger.info(f"Gemini respondió: {result[:100]}...")
-            return limpiar_markdown(result)
+            cleaned = limpiar_markdown(result)
+            del result
+            gc.collect()
+            return cleaned
         app.logger.error("Gemini también falló")
     app.logger.error("Ningún LLM respondió")
+    gc.collect()
     return None
 
 
@@ -658,6 +677,7 @@ def chat():
         return jsonify({"response": "Disculpe, no entendí bien. ¿Podría repetir?", "end_call": False, "buttons": None, "step": paso_actual_id})
     except Exception as e:
         app.logger.error(f"Error en chat: {e}", exc_info=True)
+        gc.collect()
         return jsonify({"response": "Disculpe, tuve un problema técnico. ¿Podría repetir?", "end_call": False, "buttons": None, "step": "error"})
 @app.route("/api/log-call", methods=["POST"])
 def log_call():
