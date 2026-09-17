@@ -104,20 +104,18 @@ async def generate_edge_tts(text, voice=None):
     if voice is None:
         voice = TTS_VOICE
     communicate = edge_tts.Communicate(text, voice)
-    tmp_path = os.path.join(os.path.dirname(__file__), "tmp_audio.mp3")
-    await communicate.save(tmp_path)
-    with open(tmp_path, "rb") as f:
-        audio_data = f.read()
-    os.remove(tmp_path)
-    return base64.b64encode(audio_data).decode("utf-8")
-
-
-@app.before_request
-def log_config():
-    app.logger.info(
-        f"Gemini configured: {GEMINI_CONFIGURED}, OpenRouter configured: {OPENROUTER_CONFIGURED}, Model: {OPENROUTER_MODEL}"
-    )
-    app.logger.info(f"TTS Voice: {TTS_VOICE}")
+    fd, tmp_path = tempfile.mkstemp(suffix=".mp3")
+    os.close(fd)
+    try:
+        await communicate.save(tmp_path)
+        with open(tmp_path, "rb") as f:
+            audio_data = f.read()
+        return base64.b64encode(audio_data).decode("utf-8")
+    finally:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
 
 
 @app.route("/")

@@ -1186,7 +1186,10 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: message })
             })
-            .then(response => response.json())
+            .then(function(response) {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.json();
+            })
             .then(data => {
                 var elapsed = Date.now() - startTime;
                 var remaining = Math.max(0, 3000 - elapsed);
@@ -1233,7 +1236,10 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: texto, action: action })
             })
-            .then(response => response.json())
+            .then(function(response) {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.json();
+            })
             .then(data => {
                 var elapsed = Date.now() - startTime;
                 var remaining = Math.max(0, 3000 - elapsed);
@@ -1418,7 +1424,10 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: text })
             })
-            .then(response => response.json())
+            .then(function(response) {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.json();
+            })
             .then(data => {
                 if (!isSpeaking) return;
                 
@@ -1532,7 +1541,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: saludo })
             })
-            .then(function(response) { return response.json(); })
+            .then(function(response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
             .then(function(data) {
                 if (!isCalling) { clearTimeout(fallbackTimer); return; }
                 if (data.audioUrl) {
@@ -1690,7 +1699,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             })
-            .then(function(response) { return response.json(); })
+            .then(function(response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
             .then(function(data) {
                 if (!isCalling) return;
                 if (data.error) { hideTyping(); showError("Error procesando tu mensaje."); callPromptRetry(); return; }
@@ -1725,7 +1734,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: texto, action: action })
             })
-            .then(function(response) { return response.json(); })
+            .then(function(response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
             .then(function(data) {
                 hideTyping();
                 if (!isCalling) return;
@@ -1815,7 +1824,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: cleanText })
             })
-            .then(function(response) { return response.json(); })
+            .then(function(response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
             .then(function(data) {
                 if (!isCalling || seqId !== callSequenceId) return;
                 if (data.audioUrl) {
