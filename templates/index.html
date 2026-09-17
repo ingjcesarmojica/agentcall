@@ -1710,13 +1710,24 @@
                 if (data.error) { hideTyping(); showError("Error procesando tu mensaje."); callPromptRetry(); return; }
                 var hasButtons = data.buttons && data.buttons.length > 0;
                 var needsCodeRetry = data.step === "solicitar_codigo" || data.step === "saludo_inicial";
+                if (needsCodeRetry) {
+                    // Codigo incorrecto: reiniciar llamada para pedir otro codigo
+                    hideTyping();
+                    addCallMessage(data.response, 'bot', null);
+                    setTimeout(function() {
+                        if (!isCalling) return;
+                        killAllCallAudio();
+                        speakGreeting();
+                    }, 2000);
+                    return;
+                }
                 if (hasButtons) {
                     window._pendingButtons = data.buttons;
                     window._pendingResponse = data.response;
                     callSpeak(data.response, false, true);
                 } else {
                     addCallMessage(data.response, 'bot', data.buttons);
-                    callSpeak(data.response, data.end_call, false, needsCodeRetry);
+                    callSpeak(data.response, data.end_call, false);
                 }
             })
             .catch(function() {
