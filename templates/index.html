@@ -1709,14 +1709,14 @@
                 if (!isCalling) return;
                 if (data.error) { hideTyping(); showError("Error procesando tu mensaje."); callPromptRetry(); return; }
                 var hasButtons = data.buttons && data.buttons.length > 0;
+                var needsCodeRetry = data.step === "solicitar_codigo" || data.step === "saludo_inicial";
                 if (hasButtons) {
-                    // Asesoria: solo voz, botones despues
                     window._pendingButtons = data.buttons;
                     window._pendingResponse = data.response;
                     callSpeak(data.response, false, true);
                 } else {
                     addCallMessage(data.response, 'bot', data.buttons);
-                    callSpeak(data.response, data.end_call, false);
+                    callSpeak(data.response, data.end_call, false, needsCodeRetry);
                 }
             })
             .catch(function() {
