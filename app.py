@@ -172,6 +172,7 @@ def gemini_response(user_message, context=""):
     if not GEMINI_CONFIGURED or gemini_model is None:
         return None
     try:
+        from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
         system_prompt = """Eres Claudia García, asesora legal especializada en Derecho de TusAbogados.com.
 
 ## Tu personalidad por teléfono
@@ -214,7 +215,10 @@ def gemini_response(user_message, context=""):
 
 Contexto: {context}
 Usuario: {user_message}"""
-        response = gemini_model.generate_content(prompt)
+
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(gemini_model.generate_content, prompt)
+            response = future.result(timeout=30)
         return response.text
     except Exception as e:
         app.logger.error(f"Error Gemini: {str(e)}")
@@ -476,6 +480,62 @@ def chat():
             response = formatear_mensaje(paso, {"momento_del_dia": momento})
             save_conversation(response, "saludo_inicial", "")
             return jsonify({"response": response, "end_call": False, "buttons": None, "step": "saludo_inicial"})
+
+        # ═══ DETECCION UNIVERSAL DE CODIGO: siempre procesar codigo de 3 digitos ═══
+        import re as _re
+        digits = _re.sub(r"[^0-9]", "", (message or "").strip())
+        if len(digits) == 3 and not accion_boton:
+            state = get_call_state()
+            state["codigo_acceso"] = digits
+            app.logger.info(f"[CODIGO] Buscando cita: {digits}")
+            cita = obtener_cita_por_codigo_acceso(digits)
+
+            if cita is None:
+                response = mensaje_codigo_no_encontrado()
+                state["paso_actual"] = "saludo_inicial"
+                save_call_state(state)
+                save_conversation(response, "solicitar_codigo", message)
+                gc.collect()
+                return jsonify({"response": response, "end_call": False, "buttons": None, "step": "solicitar_codigo"})
+
+            state["cita_data"] = cita
+            state["caller_name"] = cita.get("nombre", "")
+            state["paso_actual"] = "ofrecer_servicio"
+            save_call_state(state)
+
+            cat = cita.get("categoria", "")
+            desc = cita.get("descripcion_caso", "")
+            nombre = state["caller_name"]
+            primer_nombre = nombre.split()[0] if nombre else ""
+            momento = obtener_momento_del_dia()
+            response = mensaje_asesoria_caso(cat, desc)
+            llm_resp = get_llm_response(
+                "Eres Claudia García, asesora legal especialista de TusAbogados.com. "
+                "Saluda al usuario " + primer_nombre + " por su primer nombre con 'Buenas " + momento + ", " + primer_nombre + "'. "
+                "Menciona que ya analizaste su caso de derecho " + cat + ". "
+                "Luego brinda una asesoria legal breve y profesional. "
+                "REGLAS: NO uses markdown. NO garanticiones resultados. Solo el primer nombre. 4 a 5 oraciones. "
+                "Caso del usuario: " + desc[:500],
+                "Nombre: " + primer_nombre + ". Categoria: " + cat + ". Caso: " + desc[:500],
+            )
+            if llm_resp:
+                response = llm_resp
+            else:
+                saludo = f"Buenas {obtener_momento_del_dia()}, {primer_nombre}. He analizado su caso"
+                response = saludo + ", " + response.lower()
+
+            save_conversation(response, "asesoria_caso", message)
+            paso_oferta = obtener_paso("ofrecer_servicio")
+            response_oferta = paso_oferta.get("mensaje", "")
+            botones = paso_oferta.get("botones", None)
+
+            gc.collect()
+            return jsonify({
+                "response": response + " " + response_oferta,
+                "end_call": False,
+                "buttons": botones,
+                "step": "ofrecer_servicio"
+            })
 
         state = get_call_state()
         paso_actual_id = state["paso_actual"]
