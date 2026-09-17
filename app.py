@@ -218,7 +218,7 @@ Usuario: {user_message}"""
 
         with ThreadPoolExecutor(max_workers=1) as executor:
             future = executor.submit(gemini_model.generate_content, prompt)
-            response = future.result(timeout=30)
+            response = future.result(timeout=15)
         return response.text
     except Exception as e:
         app.logger.error(f"Error Gemini: {str(e)}")
@@ -288,7 +288,7 @@ Usuario: {user_message}"""
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=30,
+            timeout=15,
         )
         app.logger.info(f"OpenRouter response status: {response.status_code}")
         if response.status_code != 200:

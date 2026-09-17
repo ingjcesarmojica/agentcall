@@ -265,6 +265,7 @@ def verificar_identidad_usuario(documento, email):
 def guardar_llamada(datos):
     """
     Guarda un registro de llamada en la tabla 'llamadas'.
+    Silenciosamente ignora si la tabla no existe.
     """
     sb = get_supabase()
     if sb is None:
@@ -291,7 +292,7 @@ def guardar_llamada(datos):
         return True, llamada_id
 
     except Exception as e:
-        logger.error(f"Error guardando llamada: {e}")
+        logger.debug(f"Error guardando llamada (tabla puede no existir): {e}")
         return False, str(e)
 
 
